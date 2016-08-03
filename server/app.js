@@ -2,11 +2,11 @@ var express = require('express');
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-
-var users = require('./routes/users');
+var cookieParser = require('cookie-parser');
+// load the modern build
+var _ = require('lodash-node');
+var routes = require('./routes');
 var action = require('./actions');
 
 
@@ -22,8 +22,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/users', users);
+_.map(routes, function(route){
+  app.use(route.url, route.action);
+})
+// app.use('/users', routes.users);
+// app.use('/login', routes.login);
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
