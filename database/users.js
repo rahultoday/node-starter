@@ -7,17 +7,8 @@ var users = function(){
   table.string('digest');
   table.string('first_name');
   table.string('second_name');
-  table.string('addr_line1');
-  table.string('addr_line2');
-  table.string('city');
-  table.string('state');
-  table.string('pin');
+  table.string('role');
   table.string('image_path');
-  table.string('pan_number');
-  table.integer('mobile_number');
-  table.string('voters_id');
-  table.string('sponsers_name');
-  table.string('sponser_number');
 });
 };
 module.exports = users;
