@@ -7,7 +7,11 @@ const User = require('./../models/user'),
 module.exports = {
   addUser: (req, res)=> {
     if (!req.body || !req.body.user) {
-      res.status(400).send({success: false, status: 400, message: "User must be in request body"});
+      res.status(400).send({success: false, status: 400, message: "user must be in request body"});
+    } else if (!req.headers.token || req.headers.token === "") {
+      res.status(400).send({success: false, status: 400, message: "token must be in request header"});
+    } else if (!tokenHelper.validateToken(req.headers.token)) {
+      res.status(403).send({success: false, status: 403, message: "invalid token"});
     } else {
       try {
         let newUser = new User(req.body.user);
@@ -54,15 +58,21 @@ module.exports = {
   },
 
   listUsers: (req, res)=> {
-    userService.listUsers("", "", req.params.offset, req.params.limit)
-      .then((users)=> {
-        res.status(200).send({success: true, status: 200, data: users});
-      }).catch((error)=> {
-        res.status(error.status || 500).send({
-          success: false,
-          status: err.status || 500,
-          message: error.message || error
+    if (!req.headers.token || req.headers.token === "") {
+      res.status(400).send({success: false, status: 400, message: "token must be in request header"});
+    } else if (!tokenHelper.validateToken(req.headers.token)) {
+      res.status(403).send({success: false, status: 403, message: "invalid token"});
+    } else {
+      userService.listUsers("", "", req.params.offset, req.params.limit)
+        .then((users)=> {
+          res.status(200).send({success: true, status: 200, data: users});
+        }).catch((error)=> {
+          res.status(error.status || 500).send({
+            success: false,
+            status: error.status || 500,
+            message: error.message || error
+          });
         });
-      });
+    }
   }
 };
