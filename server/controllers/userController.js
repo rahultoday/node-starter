@@ -74,5 +74,25 @@ module.exports = {
           });
         });
     }
+  },
+  updateUer: (req, res)=> {
+    if (!req.body.user || !req.params.username) {
+      res.status(400).send({success: false, status: 400, message: "user must be in body & username must be in query"});
+    }
+    else {
+      try {
+        let newUser = new User(req.body.user);
+        newUser.validate();
+        newUser.hashPassword();
+        userService.updateUser(newUser, req.params.username)
+          .then((resp)=> {
+            res.status(200).send({success: true, status: 200, message: "User details updated successfully"});
+          }).catch((err)=> {
+            res.status(err.status || 500).send({success: false, status: err.status || 500, message: err.message || err})
+          });
+      } catch (err) {
+        res.status(500).send({success: false, status: 500, message: err.message || err});
+      }
+    }
   }
 };
