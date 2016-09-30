@@ -7,7 +7,7 @@ const User = require('./../models/user'),
 module.exports = {
   addUser: (req, res)=> {
     if (!req.body || !req.body.user) {
-      res.status(400).send({success: false,status:400, message: "User must be in request body"});
+      res.status(400).send({success: false, status: 400, message: "User must be in request body"});
     } else {
       try {
         let newUser = new User(req.body.user);
@@ -15,19 +15,25 @@ module.exports = {
         newUser.hashPassword();
         userService.addUser(newUser)
           .then((resp)=> {
-            res.status(200).send({success: true,status:200, message: "User added successfully"});
+            res.status(200).send({success: true, status: 200, message: "User added successfully"});
           }).catch((err) => {
-            res.status(err.status || 500).send({success: false,status:err.status|| 500, message: err.message || err});
+            if (err.message === 'not-unique')
+              res.status(409).send({success: false, status: 409, message: "User already exists"});
+            res.status(err.status || 500).send({
+              success: false,
+              status: err.status || 500,
+              message: err.message || err
+            });
           });
       } catch (err) {
-        res.status(500).send({success: false,status:500, message: err.message || err});
+        res.status(500).send({success: false, status: 500, message: err.message || err});
       }
     }
   },
 
   validateUser: (req, res)=> {
     if (!req.body || !req.body.userName || !req.body.password) {
-      res.status(400).send({success: false,status:400, message: 'userName & password must be in request'});
+      res.status(400).send({success: false, status: 400, message: 'userName & password must be in request'});
     } else {
       let userName = req.body.userName;
       let password = req.body.password;
@@ -37,12 +43,12 @@ module.exports = {
             let tokenForUSer = tokenHelper.generateToken();
             tokenHelper.addToCache(user[0].user_name, tokenForUSer);
             res.setHeader('accessToken', tokenForUSer);
-            res.status(200).send({success: true, status:200,message: 'login successful'});
+            res.status(200).send({success: true, status: 200, message: 'login successful'});
           } else {
-            res.status(403).send({success: false, status:403,message: 'authentication failed'});
+            res.status(403).send({success: false, status: 403, message: 'authentication failed'});
           }
         }).catch((err)=> {
-          res.status(err.status || 500).send({success: false,status:err.status || 500, message: 'login failed'});
+          res.status(err.status || 500).send({success: false, status: err.status || 500, message: 'login failed'});
         })
     }
   },
@@ -50,9 +56,13 @@ module.exports = {
   listUsers: (req, res)=> {
     userService.listUsers("", "", req.params.offset, req.params.limit)
       .then((users)=> {
-        res.status(200).send({success: true,status:200, data: users});
+        res.status(200).send({success: true, status: 200, data: users});
       }).catch((error)=> {
-        res.status(error.status || 500).send({success: false,status:err.status|| 500, message: error.message || error});
+        res.status(error.status || 500).send({
+          success: false,
+          status: err.status || 500,
+          message: error.message || error
+        });
       });
   }
 };
