@@ -31,18 +31,29 @@ module.exports = {
       });
   },
 
+  getUser :(username, role, offSet, limit)=>{
+    let condition = {};
+    if (role && role !== "")
+      condition = {"role": role};
+    if (username && username !== "")
+      condition['user_name'] = username;
+    return mySqlService.find(condition, offSet, limit, 'users')
+  },
   updateUser: (user, username)=> {
     let defer = Q.defer();
     let condition = {user_name: username};
-    mySqlService.find(condition, "", "", 'users')
+    let offset=undefined,limit=undefined;
+    mySqlService.find(condition, offset, limit, 'users')
       .then((dbUser)=> {
-        if (dbUser.length > 0) {
+        if (dbUser.length === 1) {
           Object.keys(user).forEach((property)=> {
-            if (dbUser[property] !== user[property]) {
-              dbUser[property] = user[property];
+            console.log(property);
+            console.log(dbUser[0][property]);
+            if (dbUser[0][property] !== user[property]) {
+              dbUser[0][property] = user[property];
             }
           });
-          dbUser.save((err)=> {
+          dbUser[0].save((err)=> {
             if (err)defer.reject(err);
             else defer.resolve()
           });

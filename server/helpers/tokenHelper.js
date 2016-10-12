@@ -12,7 +12,7 @@ module.exports = {
     };
   },
   validateToken: function (token) {
-    return (tokenCache[token] && tokenCache[token]['expires'] < (new Date()).getTime())
+    return (tokenCache[token] && tokenCache[token]['expires'] > (new Date()).getTime())
   },
   generateToken: function () {
     return crypto.randomBytes(64).toString('hex');
