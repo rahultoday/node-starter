@@ -25,7 +25,7 @@ function setup(db) {
   });
   db.define('profiles', {
     user_name: String,
-    digest: String,
+    password: String,
     id: {
       type: 'serial',
       key: true,

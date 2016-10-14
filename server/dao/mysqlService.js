@@ -35,5 +35,22 @@ module.exports = {
       }
     });
     return defer.promise;
+  },
+  removeById: function (id, table) {
+    var defer = Q.defer();
+    connection.models[table].get(id, function (err, item) {
+      if (err)
+        defer.reject(err);
+      else {
+        item.remove(function (err) { // callback optional
+          if (err)
+            defer.reject(err);
+          else
+            defer.resolve("item removed");
+        });
+      }
+
+    });
+    return defer.promise;
   }
-}
+};

@@ -8,10 +8,10 @@ module.exports = {
   addUser: (req, res)=> {
     if (!req.body || !req.body.user) {
       res.status(400).send({success: false, status: 400, message: "user must be in request body"});
-    //} else if (!req.headers.accesToken || req.headers.accesToken === "") {
-    //  res.status(400).send({success: false, status: 400, message: "token must be in request header"});
-    //} else if (!tokenHelper.validateToken(req.headers.accesToken)) {
-    //  res.status(403).send({success: false, status: 403, message: "invalid token"});
+      //} else if (!req.headers.token || req.headers.token === "") {
+      //  res.status(400).send({success: false, status: 400, message: "token must be in request header"});
+      //} else if (!tokenHelper.validateToken(req.headers.token)) {
+      //  res.status(403).send({success: false, status: 403, message: "invalid token"});
     } else {
       try {
         let newUser = new User(req.body.user);
@@ -47,7 +47,7 @@ module.exports = {
             let tokenForUSer = tokenHelper.generateToken();
             tokenHelper.addToCache(user[0].user_name, tokenForUSer);
             res.setHeader('accessToken', tokenForUSer);
-            res.status(200).send({success: true, status: 200, message: 'login successful'});
+            res.status(200).send({success: true, status: 200, role: user[0]['role'], message: 'login successful'});
           } else {
             res.status(403).send({success: false, status: 403, message: 'authentication failed'});
           }
@@ -58,41 +58,73 @@ module.exports = {
   },
 
   listUsers: (req, res)=> {
-    //if (!req.headers.accesToken || req.headers.accesToken === "") {
+    //if (!req.headers.token || req.headers.token === "") {
     //  res.status(400).send({success: false, status: 400, message: "token must be in request header"});
-    //} else if (!tokenHelper.validateToken(req.headers.accesToken)) {
+    //} else if (!tokenHelper.validateToken(req.headers.token)) {
     //  res.status(403).send({success: false, status: 403, message: "invalid token"});
     //} else {
-      userService.listUsers("", "", req.params.offset, req.params.limit)
-        .then((users)=> {
-          res.status(200).send({success: true, status: 200, data: users});
-        }).catch((error)=> {
-          res.status(error.status || 500).send({
-            success: false,
-            status: error.status || 500,
-            message: error.message || error
-          });
+    userService.listUsers("", "", req.params.offset, req.params.limit)
+      .then((users)=> {
+        res.status(200).send({success: true, status: 200, data: users});
+      }).catch((error)=> {
+        res.status(error.status || 500).send({
+          success: false,
+          status: error.status || 500,
+          message: error.message || error
         });
-  //  }
+      });
+    //  }
   },
   updateUer: (req, res)=> {
     if (!req.body.user || !req.query.username) {
       res.status(400).send({success: false, status: 400, message: "user must be in body & username must be in query"});
+      //} else if (!req.headers.token || req.headers.token === "") {
+      //  res.status(400).send({success: false, status: 400, message: "token must be in request header"});
+      //} else if (!tokenHelper.validateToken(req.headers.token)) {
+      //  res.status(403).send({success: false, status: 403, message: "invalid token"});
     }
     else {
       try {
+        let selfProfile = false;
+        let user = tokenHelper.getDetails(req.headers.token);
+        //if (user.user === req.query.username)
+        //  selfProfile = true;
+
+        if (!selfProfile)
+          req.body.user.password = "";
+
         let newUser = new User(req.body.user);
         newUser.validate();
-        newUser.hashPassword();
+        if (selfProfile)
+          newUser.hashPassword();
+        else
+          delete newUser.password;
         userService.updateUser(newUser, req.query.username)
           .then((resp)=> {
             res.status(200).send({success: true, status: 200, message: "User details updated successfully"});
           }).catch((err)=> {
-            res.status(err.status || 500).send({success: false, status: err.status || 500, message: err.message || err})
+            res.status(err.status || 500).send({
+              success: false,
+              status: err.status || 500,
+              message: err.message || err
+            })
           });
       } catch (err) {
         res.status(500).send({success: false, status: 500, message: err.message || err});
       }
+    }
+  },
+  deleteUser: (req, res)=> {
+    if (!req.query.id) {
+      res.status(400).send({success: false, status: 400, message: "id must be in params"});
+    } else {
+      userService.deleteUser(req.query.id)
+        .then((resp)=> {
+          res.status(200).send({success: true, status: 200, message: 'user deleted successfully'});
+        })
+        .catch((err)=> {
+          res.status(err.status || 500).send({success: false, status: err.status || 500, message: err.message || err});
+        });
     }
   }
 };
