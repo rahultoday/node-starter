@@ -7,7 +7,8 @@ const profileController = require('./../controllers/profileController');
 
 module.exports = (server)=> {
   server.post('/profile/create', profileController.addProfile);
-  server.post('/profile/update', profileController.editProfile);
+  //server.post('/profile/update', profileController.editProfile);
   server.post('/profile/delete',profileController.deleteProfile);
   server.get('/profile/list',profileController.listProfiles);
+  server.post('/profile/approve',profileController.approveProfile)
 };

@@ -52,5 +52,16 @@ module.exports = {
 
     });
     return defer.promise;
+  },
+  getById: function (id, table) {
+    var defer = Q.defer();
+    connection.models[table].get(id, function (err, item) {
+      if (err)
+        defer.reject(err);
+      else {
+        defer.resolve(item);
+      }
+    });
+    return defer.promise;
   }
 };

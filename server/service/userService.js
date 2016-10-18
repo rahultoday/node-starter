@@ -31,7 +31,7 @@ module.exports = {
       });
   },
 
-  getUser: (username, role, offSet, limit)=> {
+  getProfile: (username, role, offSet, limit)=> {
     let condition = {};
     if (role && role !== "")
       condition = {"role": role};
@@ -42,8 +42,7 @@ module.exports = {
   updateUser: (user, username)=> {
     let defer = Q.defer();
     let condition = {user_name: username};
-    let offset = undefined, limit = undefined;
-    mySqlService.find(condition, offset, limit, 'users')
+    mySqlService.find(condition, undefined, undefined, 'users')
       .then((dbUser)=> {
         if (dbUser.length === 1) {
           Object.keys(user).forEach((property)=> {

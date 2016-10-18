@@ -14,6 +14,7 @@ module.exports = {
       //  res.status(403).send({success: false, status: 403, message: "invalid token"});
     } else {
       try {
+
         let newUser = new User(req.body.user);
         newUser.validate();
         newUser.hashPassword();
@@ -41,7 +42,7 @@ module.exports = {
     } else {
       let userName = req.body.userName;
       let password = req.body.password;
-      userService.getUser(userName)
+      userService.getProfile(userName)
         .then((user)=> {
           if (user.length === 1 && passWordHelper.verifyHashed(password, user[0]['password'])) {
             let tokenForUSer = tokenHelper.generateToken();
@@ -58,11 +59,6 @@ module.exports = {
   },
 
   listUsers: (req, res)=> {
-    //if (!req.headers.token || req.headers.token === "") {
-    //  res.status(400).send({success: false, status: 400, message: "token must be in request header"});
-    //} else if (!tokenHelper.validateToken(req.headers.token)) {
-    //  res.status(403).send({success: false, status: 403, message: "invalid token"});
-    //} else {
     userService.listUsers("", "", req.params.offset, req.params.limit)
       .then((users)=> {
         res.status(200).send({success: true, status: 200, data: users});
@@ -78,17 +74,12 @@ module.exports = {
   updateUer: (req, res)=> {
     if (!req.body.user || !req.query.username) {
       res.status(400).send({success: false, status: 400, message: "user must be in body & username must be in query"});
-      //} else if (!req.headers.token || req.headers.token === "") {
-      //  res.status(400).send({success: false, status: 400, message: "token must be in request header"});
-      //} else if (!tokenHelper.validateToken(req.headers.token)) {
-      //  res.status(403).send({success: false, status: 403, message: "invalid token"});
     }
     else {
       try {
         let selfProfile = false;
-        let user = tokenHelper.getDetails(req.headers.token);
-        //if (user.user === req.query.username)
-        //  selfProfile = true;
+        if (req.query.self)
+          selfProfile = true;
 
         if (!selfProfile)
           req.body.user.password = "";

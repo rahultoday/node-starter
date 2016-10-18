@@ -1,8 +1,8 @@
 'use strict';
-const mySqlService =require('./../dao/mysqlService');
+const mySqlService = require('./../dao/mysqlService');
+const Q = require('q');
 
-
-module.exports ={
+module.exports = {
   addProfile: (profile) => {
     let newProfiles = [];
     newProfiles.push(profile);
@@ -28,13 +28,28 @@ module.exports ={
       });
   },
 
-  getUser :(username, role, offSet, limit)=>{
+  getProfile: (username, role, offSet, limit)=> {
     let condition = {};
     if (role && role !== "")
       condition = {"role": role};
     if (username && username !== "")
       condition['user_name'] = username;
     return mySqlService.find(condition, offSet, limit, 'profiles')
-  }
+  },
 
+  approveProfile: (id)=> {
+    return mySqlService.getById(id, "profiles")
+      .then((profile)=> {
+        let defer = Q.defer();
+        profile['verified'] = true;
+        profile.save((err)=> {
+          if (err) defer.reject(err);
+          else defer.resolve("profile updated successfully");
+        });
+        return defer.promise;
+      });
+  },
+  deleteProfile:(id)=>{
+    return mySqlService.removeById(id,'profiles');
+  }
 };

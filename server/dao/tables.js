@@ -25,7 +25,6 @@ function setup(db) {
   });
   db.define('profiles', {
     user_name: String,
-    password: String,
     id: {
       type: 'serial',
       key: true,
@@ -34,6 +33,11 @@ function setup(db) {
     first_name: String,
     second_name: String,
     addr_line1: String,
+    current_location:String,
+    height:String,
+    weight:String,
+    blood_group:String,
+    criminal_background:{ type: "boolean"},
     addr_line2: String,
     city: String,
     state: String,
@@ -44,7 +48,7 @@ function setup(db) {
     voters_id: String,
     sponsers_name: String,
     sponser_number: String,
-    verified: String
+    verified: { type: "boolean", defaultValue: false }
   }, {
     validations: {
       user_name:orm.enforce.unique(),
